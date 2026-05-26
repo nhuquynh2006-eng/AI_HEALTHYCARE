@@ -1,7 +1,7 @@
 import streamlit as st
 from groq import Groq
 
-client = Groq(api_key="GROQ_API_KEY")
+client = Groq(api_key="GROQ_API_KE")
 
 def chatbot_page():
     st.markdown("---")
