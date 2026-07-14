@@ -24,14 +24,52 @@ def dashboard_page():
     cursor.execute("SELECT AVG(risk) FROM predictions")
     avg_risk = cursor.fetchone()[0] or 0
 
-    # ===== METRIC CARDS =====
+    # ===== METRIC CARDS — HTML thay st.metric() =====
     st.markdown("### 📈 Tổng quan")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("👥 Người dùng", total_users)
-    col2.metric("🔢 Tổng dự đoán", total_predictions)
-    col3.metric("⚠️ Nguy cơ cao", high_risk)
-    col4.metric("✅ Nguy cơ thấp", low_risk)
-    col5.metric("📊 Risk TB", f"{avg_risk:.1f}%")
+    st.markdown(f"""
+    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:1rem;">
+        <div style="background:#ffffff; border:1px solid #d4ede6; border-radius:12px;
+                    padding:14px 12px; box-shadow:0 1px 4px rgba(13,79,60,0.06);">
+            <div style="font-size:11px; color:#5a8a7a; font-weight:600;
+                        text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">
+                👥 Người dùng
+            </div>
+            <div style="font-size:22px; font-weight:700; color:#0d4f3c;">{total_users}</div>
+        </div>
+        <div style="background:#ffffff; border:1px solid #d4ede6; border-radius:12px;
+                    padding:14px 12px; box-shadow:0 1px 4px rgba(13,79,60,0.06);">
+            <div style="font-size:11px; color:#5a8a7a; font-weight:600;
+                        text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">
+                🔢 Tổng dự đoán
+            </div>
+            <div style="font-size:22px; font-weight:700; color:#0d4f3c;">{total_predictions}</div>
+        </div>
+        <div style="background:#ffffff; border:1px solid #fcebeb; border-radius:12px;
+                    padding:14px 12px; box-shadow:0 1px 4px rgba(13,79,60,0.06);">
+            <div style="font-size:11px; color:#a32d2d; font-weight:600;
+                        text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">
+                ⚠️ Nguy cơ cao
+            </div>
+            <div style="font-size:22px; font-weight:700; color:#a32d2d;">{high_risk}</div>
+        </div>
+        <div style="background:#ffffff; border:1px solid #d4ede6; border-radius:12px;
+                    padding:14px 12px; box-shadow:0 1px 4px rgba(13,79,60,0.06);">
+            <div style="font-size:11px; color:#0f6e56; font-weight:600;
+                        text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">
+                ✅ Nguy cơ thấp
+            </div>
+            <div style="font-size:22px; font-weight:700; color:#0f6e56;">{low_risk}</div>
+        </div>
+        <div style="background:#ffffff; border:1px solid #d4ede6; border-radius:12px;
+                    padding:14px 12px; box-shadow:0 1px 4px rgba(13,79,60,0.06);">
+            <div style="font-size:11px; color:#5a8a7a; font-weight:600;
+                        text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">
+                📊 Risk trung bình
+            </div>
+            <div style="font-size:22px; font-weight:700; color:#0d4f3c;">{avg_risk:.1f}%</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -39,7 +77,6 @@ def dashboard_page():
     col1, col2 = st.columns(2)
 
     with col1:
-        # Pie chart tỉ lệ
         fig_pie = px.pie(
             names=["High Risk", "Low Risk"],
             values=[high_risk, low_risk],
@@ -54,7 +91,6 @@ def dashboard_page():
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with col2:
-        # Bar chart glucose trung bình theo kết quả
         cursor.execute("SELECT result, AVG(glucose), AVG(bmi), AVG(risk) FROM predictions GROUP BY result")
         avg_data = cursor.fetchall()
 
@@ -80,7 +116,6 @@ def dashboard_page():
     col1, col2 = st.columns(2)
 
     with col1:
-        # Risk theo từng lần dự đoán
         cursor.execute("SELECT id, risk, result FROM predictions ORDER BY id")
         trend_data = cursor.fetchall()
         trend_df = pd.DataFrame(trend_data, columns=["ID", "Risk", "Result"])
@@ -97,7 +132,6 @@ def dashboard_page():
         st.plotly_chart(fig_trend, use_container_width=True)
 
     with col2:
-        # Phân bố glucose
         cursor.execute("SELECT glucose, result FROM predictions")
         glucose_data = cursor.fetchall()
         glucose_df = pd.DataFrame(glucose_data, columns=["Glucose", "Result"])
